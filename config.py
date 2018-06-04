@@ -8,3 +8,4 @@ config = {
     "address": "n1FF1nz6tarkDVwWQkMnnwFPuPKUaQTdptE",
     "passphrase": "passphrase",
 }
+

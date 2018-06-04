@@ -76,6 +76,13 @@ class Nebulas(object):
         }
         return self._transaction(self.address, 0, contract_dict)
 
+    def call_function(self, contract_address, function, args, value=0):
+        to = contract_address
+        contract_dict = {
+            'function': function,
+            'args': "[%s]" % (",".join(args)),
+        }
+        return self._transaction(to, value, contract_dict)
 
     def get_account_state(self):
         url = urlparse.urljoin(self.domain, "/v1/user/accountstate")
