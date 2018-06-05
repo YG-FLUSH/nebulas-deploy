@@ -31,8 +31,9 @@ def check_transaction(neb, txhash):
 def main():
     parser = OptionParser()
     parser.add_option("-d", "--deploy", type="string", dest="contract_file", help=u"部署合约")
-    parser.add_option("-c", "--call", type="string", dest="call", help=u"调用合约函数 'contract_address function arg1 arg2'")
-    parser.add_option("-q", "--query", type="string", dest="query", help=u"查询合约数据 'contract_address function arg1 arg2'")
+    parser.add_option("-c", "--call", type="string", dest="call", help=u"调用合约函数 'function arg1 arg2' -a xxx")
+    parser.add_option("-q", "--query", type="string", dest="query", help=u"查询合约数据 'function arg1 arg2' -a xxx")
+    parser.add_option("-a", "--contract_address", type="string", dest="contract_address", help=u"调用的合约地址'")
     parser.add_option("-t", "--txhash", type="string", dest="txhash", help=u"查看交易状态'")
     neb = Nebulas(config['domain'], config['address'], config['passphrase'])
     options, _ = parser.parse_args()
@@ -45,27 +46,33 @@ def main():
         print result
         check_transaction(neb, result['txhash'])
 
+    contract_address = options.contract_address
     call = options.call
     if call:
-        _args = call.split(" ")
-        if len(_args) < 2:
-            print red("call function should have at lease two args")
+        if not contract_address:
+            print red("Please specify -a ")
             return
-        _args.reverse()
-        contract_address, function = _args.pop(), _args.pop()
-        result = neb.call(contract_address, function, _args)
+
+        _args = call.strip().split(" ")
+        function = _args[0]
+        if not function:
+            print red("function Must Exist")
+            return
+        result = neb.call(contract_address, function, _args[1:])
         print result
         check_transaction(neb, result['txhash'])
 
     query = options.query
     if query:
-        _args = query.split(" ")
-        if len(_args) < 2:
-            print red("query function should have at lease two args")
+        if not contract_address:
+            print red("Please specify -a ")
             return
-        _args.reverse()
-        contract_address, function = _args.pop(), _args.pop()
-        print neb.query(contract_address, function, _args)
+        _args = query.strip().split(" ")
+        function = _args[0]
+        if not function:
+            print red("function Must Exist")
+            return
+        print neb.query(contract_address, function, _args[1:])
 
     txhash = options.txhash
     if txhash:
