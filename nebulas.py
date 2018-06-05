@@ -76,13 +76,31 @@ class Nebulas(object):
         }
         return self._transaction(self.address, 0, contract_dict)
 
-    def call_function(self, contract_address, function, args, value=0):
+    def call(self, contract_address, function, args, value=0):
         to = contract_address
         contract_dict = {
             'function': function,
             'args': "[%s]" % (",".join(args)),
         }
         return self._transaction(to, value, contract_dict)
+
+    def query(self, contract_address, function, args):
+        state = self.get_account_state()
+        nonce = int(state['nonce']) + 1
+        data = {
+            "from": self.address,
+            "to": contract_address,
+            "value": "0",
+            "nonce": str(nonce),
+            "gasPrice": "1000000",
+            "gasLimit": "2000000",
+            "contract": {
+                "function": function,
+                'args': "[%s]" % (",".join(args)),
+            }
+        }
+        url = urlparse.urljoin(self.domain, "/v1/user/call")
+        return self.send_request(url, data)
 
     def get_account_state(self):
         url = urlparse.urljoin(self.domain, "/v1/user/accountstate")
@@ -94,5 +112,6 @@ class Nebulas(object):
         url = urlparse.urljoin(self.domain, "/v1/user/getTransactionReceipt")
         data = {'hash': txhash}
         return self.send_request(url, data)
+
 
 
